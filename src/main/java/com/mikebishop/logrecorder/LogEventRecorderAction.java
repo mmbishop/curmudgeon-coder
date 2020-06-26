@@ -1,6 +1,6 @@
 package com.mikebishop.logrecorder;
 
-public enum LogRecorderAction {
+public enum LogEventRecorderAction {
 
     PLAY,
     PAUSE,

@@ -5,21 +5,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class LogRecorder {
+public class LogEventRecorder {
 
-    private List<LogEntry> logEntries;
+    private List<LogEvent> logEvents;
     private LogPlayer logPlayer;
     private int currentPosition;
-    private LogRecorderState currentState;
+    private LogEventRecorderState currentState;
 
-    public LogRecorder() {
-        logEntries = new ArrayList<>();
+    public LogEventRecorder() {
+        logEvents = new ArrayList<>();
         currentPosition = 0;
-        currentState = LogRecorderState.IDLE;
+        currentState = LogEventRecorderState.IDLE;
     }
 
     public void play() {
-        if (actionIsValidInCurrentState(LogRecorderAction.PLAY)) {
+        if (actionIsValidInCurrentState(LogEventRecorderAction.PLAY)) {
             logPlayer = new LogPlayer();
             Thread playerThread = new Thread(logPlayer);
             playerThread.start();
@@ -27,20 +27,20 @@ public class LogRecorder {
     }
 
     public void pause() {
-        if (actionIsValidInCurrentState(LogRecorderAction.PAUSE)) {
+        if (actionIsValidInCurrentState(LogEventRecorderAction.PAUSE)) {
             logPlayer.stop();
         }
     }
 
     public void stop() {
-        if (actionIsValidInCurrentState(LogRecorderAction.STOP)) {
+        if (actionIsValidInCurrentState(LogEventRecorderAction.STOP)) {
             logPlayer.stop();
         }
     }
 
     public void record() {
         try {
-            setNextState(LogRecorderAction.RECORD);
+            setNextState(LogEventRecorderAction.RECORD);
         }
         catch (IllegalActionException e) {
             System.err.println(e.getMessage());
@@ -48,32 +48,32 @@ public class LogRecorder {
     }
 
     public void rewind() {
-        if (actionIsValidInCurrentState(LogRecorderAction.REWIND)) {
+        if (actionIsValidInCurrentState(LogEventRecorderAction.REWIND)) {
             currentPosition = 0;
         }
     }
 
     public void fastForward() {
-        if (actionIsValidInCurrentState(LogRecorderAction.FAST_FORWARD)) {
-            currentPosition = Math.min(currentPosition + 3, logEntries.size());
+        if (actionIsValidInCurrentState(LogEventRecorderAction.FAST_FORWARD)) {
+            currentPosition = Math.min(currentPosition + 3, logEvents.size());
         }
     }
 
-    public void recordLogEntry(LogEntry logEntry) {
-        if (currentState.equals(LogRecorderState.RECORDING)) {
-            logEntries.add(logEntry);
-            currentPosition = logEntries.size();
+    public void recordLogEvent(LogEvent LogEvent) {
+        if (currentState.equals(LogEventRecorderState.RECORDING)) {
+            logEvents.add(LogEvent);
+            currentPosition = logEvents.size();
         }
     }
 
     public void setCurrentPosition(LocalDateTime time) {
-        if (actionIsValidInCurrentState(LogRecorderAction.SET_POSITION)) {
-            Optional<LogEntry> nextLogEntry = logEntries.stream().filter(logEntry -> logEntry.time().isAfter(time)).findFirst();
-            nextLogEntry.ifPresent(logEntry -> currentPosition = logEntries.indexOf(logEntry));
+        if (actionIsValidInCurrentState(LogEventRecorderAction.SET_POSITION)) {
+            Optional<LogEvent> nextLogEvent = logEvents.stream().filter(LogEvent -> LogEvent.time().isAfter(time)).findFirst();
+            nextLogEvent.ifPresent(LogEvent -> currentPosition = logEvents.indexOf(LogEvent));
         }
     }
 
-    private boolean actionIsValidInCurrentState(LogRecorderAction action) {
+    private boolean actionIsValidInCurrentState(LogEventRecorderAction action) {
         try {
             setNextState(action);
             return true;
@@ -84,22 +84,22 @@ public class LogRecorder {
         }
     }
 
-    private void setNextState(LogRecorderAction action) {
+    private void setNextState(LogEventRecorderAction action) {
         try {
             currentState = currentState.nextState(action);
         }
         catch (IllegalActionException e) {
-            currentState = LogRecorderState.IDLE;
+            currentState = LogEventRecorderState.IDLE;
             throw e;
         }
     }
 
-    private void playLogEntry() {
-        System.out.println(logEntries.get(currentPosition++));
+    private void playLogEvent() {
+        System.out.println(logEvents.get(currentPosition++));
     }
 
     private boolean endOfLog() {
-        return currentPosition == logEntries.size();
+        return currentPosition == logEvents.size();
     }
 
     private class LogPlayer implements Runnable {
@@ -109,7 +109,7 @@ public class LogRecorder {
         @Override
         public void run() {
             while ((! endOfLog()) && (! stopped)) {
-                playLogEntry();
+                playLogEvent();
                 try {
                     Thread.sleep(1000);
                 }

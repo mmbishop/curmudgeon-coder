@@ -1,9 +1,9 @@
 package com.mikebishop.logrecorder;
 
-public enum LogRecorderState {
+public enum LogEventRecorderState {
 
     IDLE {
-        public LogRecorderState nextState(LogRecorderAction action) {
+        public LogEventRecorderState nextState(LogEventRecorderAction action) {
             return switch (action) {
                 case PLAY -> PLAYING;
                 case RECORD -> RECORDING;
@@ -12,7 +12,7 @@ public enum LogRecorderState {
         }
     },
     PLAYING {
-        public LogRecorderState nextState(LogRecorderAction action) {
+        public LogEventRecorderState nextState(LogEventRecorderAction action) {
             return switch (action) {
                 case PAUSE -> PAUSED;
                 case STOP -> IDLE;
@@ -22,7 +22,7 @@ public enum LogRecorderState {
         }
     },
     RECORDING {
-        public LogRecorderState nextState(LogRecorderAction action) {
+        public LogEventRecorderState nextState(LogEventRecorderAction action) {
             return switch (action) {
                 case STOP -> IDLE;
                 default -> throw new IllegalActionException("You can't do anything else while recording until you stop the recording");
@@ -30,7 +30,7 @@ public enum LogRecorderState {
         }
     },
     PAUSED {
-        public LogRecorderState nextState(LogRecorderAction action) {
+        public LogEventRecorderState nextState(LogEventRecorderAction action) {
             return switch (action) {
                 case PLAY, PAUSE -> PLAYING;
                 case STOP -> IDLE;
@@ -40,6 +40,6 @@ public enum LogRecorderState {
         };
     };
 
-    public abstract LogRecorderState nextState(LogRecorderAction action);
+    public abstract LogEventRecorderState nextState(LogEventRecorderAction action);
 
 }
